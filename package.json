@@ -1,0 +1,35 @@
+{
+  "name": "stitch",
+  "version": "1.0.0",
+  "description": "Web application for creating Stitch Chema from any image",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OlgaMatosova/createStitchChema.git"
+  },
+  "keywords": [
+    "Stitch",
+    "online",
+    "converter"
+  ],
+  "author": "OlgaMatosova",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/OlgaMatosova/createStitchChema/issues"
+  },
+  "homepage": "https://github.com/OlgaMatosova/createStitchChema#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^3.1.1",
+    "gulp-concat": "^2.6.1",
+    "gulp-jshint": "^2.0.4",
+    "gulp-rename": "^1.2.2",
+    "gulp-sass": "^3.1.0",
+    "gulp-uglify": "^2.0.0",
+    "gulp-watch": "^4.3.11",
+    "jshint": "^2.9.4"
+  }
+}

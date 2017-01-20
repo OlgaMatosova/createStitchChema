@@ -1,0 +1,8 @@
+*.log
+config/local.php
+config.php
+tools/config.php
+vendor/*
+/node_modules/
+/nbproject/
+/nbproject/private/

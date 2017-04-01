@@ -3,19 +3,22 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1, width=device-width, maximum-scale=1, minimum-scale=1, user-scalable=no">
-    <title>Parazit</title>
+    <title>Stitch</title>
+    <link rel="stylesheet" href="public/css/main.css">
     <style>
-      body {
-        margin: 0px;
-        padding: 0px;
-      }
+
     </style>
   </head>
   <body>
-    <label>Image File:</label><br/>
-    <input type="file" id="imageLoader" name="imageLoader"/>
-    <span id="makePixel">Click</span>
-    <canvas id="myCanvas" width="578" height="400"></canvas>
+    <div class="pannel">
+        <label>Open:</label>
+        <input type="file" id="imageLoader" name="imageLoader"/>
+
+        <span id="makePixel">Click</span>
+        <a id="downloadLnk">Download</a>
+        <span>Zoom: <button id="zoomPlus">+</button>  <button id="zoomMinus">-</button></span>
+    </div>
+    <canvas id="myCanvas" width="800" height="600"></canvas>
     <script type="text/javascript" src="http://code.jquery.com/jquery-3.1.1.js"></script>
     <script src="js/main.js"></script>
   </body>

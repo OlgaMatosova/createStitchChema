@@ -1,0 +1,13 @@
+body {
+  margin: 0px;
+  padding: 0px;
+  display: flex; }
+
+.pannel {
+  flex-basis: 30%; }
+
+canvas {
+  max-width: 90%;
+  margin: 20px auto; }
+
+/*# sourceMappingURL=main.css.map */

@@ -1,16 +1,25 @@
 $dark-gray: #3d464d;
 
 body {
-    margin: 0px;
+   
    padding: 0px;
-   display: flex;
+  }
 
-}
-.pannel {
-    flex-basis: 30%;
-
+.uk-grid {
+    margin: 0 auto;
 }
 canvas {
-    max-width: 90%;
-    margin: 20px auto;
+  
+}
+#pallete {
+    list-style: none;
+    margin: 0;
+    li{
+        clear: both;
+        span {
+            float: left;
+            width: 60px;
+            height: 20px
+        }
+    }
 }

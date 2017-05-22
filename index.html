@@ -4,22 +4,46 @@
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1, width=device-width, maximum-scale=1, minimum-scale=1, user-scalable=no">
     <title>Stitch</title>
+    <link rel="stylesheet" href="public/css/uikit.min.css">
     <link rel="stylesheet" href="public/css/main.css">
-    <style>
 
-    </style>
   </head>
   <body>
-    <div class="pannel">
-        <label>Open:</label>
-        <input type="file" id="imageLoader" name="imageLoader"/>
+      
+      <div class="uk-grid"  uk-grid>
+            <div class="pannel uk-card-primary uk-width-1-3@m uk-card uk-card-default uk-card-body">
+           
+                <div class="uk-margin" uk-margin>
+                <div uk-form-custom="target: true">
+             
+                    <input type="file"  id="imageLoader" name="imageLoader"/>
+                  <input class="uk-input uk-form-width-medium" type="text" placeholder="Select file" disabled>
+                    </div>
+                    
+                </div>
+        
 
-        <span id="makePixel">Click</span>
-        <a id="downloadLnk">Download</a>
-        <span>Zoom: <button id="zoomPlus">+</button>  <button id="zoomMinus">-</button></span>
-    </div>
-    <canvas id="myCanvas" width="800" height="600"></canvas>
+        <p><span id="makePixel" class="uk-button uk-button-primary">Create Schema</span></p>
+     
+        <p><span>Zoom: <button id="zoomPlus" class="uk-button uk-button-default"><i uk-icon="icon: plus"></i></button>  <button id="zoomMinus" class="uk-button uk-button-default"><i uk-icon="icon: minus"></i></button></span></p>
+        <p><button class="getPallete uk-button uk-button-primary"><i uk-icon="icon: paint-bucket"></i>Get pallete</button></p>
+        <ul id="pallete"  class="uk-list uk-list-divider"></ul>
+        <hr class="uk-divider-icon">
+        <p><a id="downloadLnk"><i uk-icon="icon: download"></i>Download</a></p>
+      </div>
+        <div class="uk-card uk-card-default uk-card-body">
+            <canvas id="myCanvas" width="800" height="600"></canvas>
+        </div>
+      </div>
+  
+
+
     <script type="text/javascript" src="http://code.jquery.com/jquery-3.1.1.js"></script>
+    <script type="text/javascript" src="public/js/uikit.min.js"></script>
+    <script type="text/javascript" src="public/js/uikit-icons.min.js"></script>
+
+    <script type="text/javascript" src="js/getColorPallete.js"></script>
+
     <script src="js/main.js"></script>
   </body>
 </html>

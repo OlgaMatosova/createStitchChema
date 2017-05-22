@@ -110,7 +110,32 @@ function saveImage (link, canvasId, filename) {
     link.download = filename;
 }
 
-
 $('#downloadLnk').on('click', function() {
+
     imageObj.saveImage(this, 'myCanvas', 'test.png');
 });
+
+
+$('.getPallete').on('click', function(){
+    var canvas = document.getElementById('myCanvas'),
+    dataUrl = canvas.toDataURL(),
+    myImage = document.createElement('img');
+    myImage.src = dataUrl;
+
+//    var dominantColor = getDominantColor(myImage);
+//   var paletteArray = createPalette(myImage, 10);
+    var colorThief = new ColorThief();
+   
+     var items = [];
+     items = colorThief.getPalette(myImage);
+
+     items.map(function(item) {
+    
+         var liText = rgbToHex(item[0], item[1], item[2]);
+             console.log(liText);
+        $('#pallete').append($('<li>').text(liText).append($('<span>').css('background-color', liText)));
+      });
+});
+function rgbToHex(r, g, b) {
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}

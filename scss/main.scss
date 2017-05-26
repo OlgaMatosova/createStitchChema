@@ -1,15 +1,15 @@
 $dark-gray: #3d464d;
 
 body {
-   
-   padding: 0px;
+  padding: 0px;
   }
 
 .uk-grid {
     margin: 0 auto;
 }
-canvas {
-  
+.canvasWrapper{
+ 
+  margin-top: 0;
 }
 #pallete {
     list-style: none;
@@ -19,7 +19,20 @@ canvas {
         span {
             float: left;
             width: 60px;
-            height: 20px
+            height: 20px;
+            margin-right: 15px;
         }
     }
+}
+.canvasGrid {
+    position: absolute;
+    top: 60px;
+    left: 60px;
+}
+#grid {
+    z-index: 4;
+}
+#myCanvas {
+    z-index: 1;
+    
 }

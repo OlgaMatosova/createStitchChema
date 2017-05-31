@@ -35,18 +35,19 @@ function drawGridLines(canvas, lineOptions) {
 }
 
 function drawGrid(canvas) {
-     var separationSize = 100.5;
+     var separationSize = 50.5;
 
      if(canvas.width < separationSize*5){
-         separationSize = 30.5;
+         separationSize = 20.5;
      }
      var gridOptions = {
         majorLines: {
             separation: separationSize,
-            color: '#999'
+             color: '#999'
           }
     };
-    drawGridLines(canvas, gridOptions.majorLines);
+
+     drawGridLines(canvas, gridOptions.majorLines);
     return;
 }
 
@@ -66,19 +67,25 @@ function drawGridLines(canvas, lineOptions) {
     var i = null;
     var x = null;
     var y = null;
+    
     iCount = Math.floor(iWidth / lineOptions.separation);
 
     for (i =1; i <= iCount; i++) {
         if( i%2 ==0 ){
 
             x = (i * lineOptions.separation )- 0.5;
+
+
         } else {
             x = (i * lineOptions.separation);
+
         }
         ctx.moveTo(x, 0);
         ctx.lineTo(x, iHeight);
         ctx.stroke();
+
     }
+
 
     iCount = Math.floor(iHeight / lineOptions.separation);
 

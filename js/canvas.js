@@ -3,7 +3,6 @@ var imageObj = {
         init: initCanvas, /* init canvas */
         makePixelezation: makePixelezation, /* create schema */
         saveImage: saveImage, /* save image */
-        createPallete: createPallete,
         canvas: getCanvas,
         context: getContext
 };
@@ -18,11 +17,11 @@ function getContext(canvas) {
 
 function initCanvas (idCanvas) {
     this.canvasId = idCanvas;
+
     var imageLoader = document.getElementById('imageLoader'),
         canvas = this.canvas(this.canvasId),
-        ctx = this.context(canvas),
-        src;
-           
+        ctx = this.context(canvas);
+
     imageLoader.addEventListener('change', handleImage, false);
 
     function handleImage (e) {
@@ -49,18 +48,11 @@ function initCanvas (idCanvas) {
 }
 
 
-function makePixelezation (pixelRatio) {
+function makePixelezation () {
 
-    var pixelation,
-        canvas = this.canvas(this.canvasId),
+    var canvas = this.canvas(this.canvasId),
         ctx = this.context(canvas),
         imageObj = new Image();
-       
-    if (pixelRatio == undefined) {
-        pixelation = 10;
-    } else {
-        pixelation = pixelRatio;
-    }
 
     imageObj.onload = function () {
 
@@ -69,34 +61,41 @@ function makePixelezation (pixelRatio) {
             destX = canvas.width / 2 - sourceWidth / 2,
             destY = canvas.height / 2 - sourceHeight / 2;
 
-        ctx.drawImage(imageObj, destX, destY);
+            ctx.drawImage(imageObj, destX, destY);
 
-        if (pixelation < 1) {
-            clearInterval(intervalId);
-        } else {
             focusImage(ctx, this, sourceWidth, sourceHeight, destX, destY);
-        }
-        grid.init(canvas);
+
+
+            grid.init(canvas);
     },
 
     imageObj.src = this.src;
 
     function focusImage (ctx, imageObj, sourceWidth, sourceHeight, destX, destY) {
-        var sourceX = destX,
-            sourceY = destY,
-            imageData = ctx.getImageData(sourceX, sourceY, sourceWidth, sourceHeight),
-            data = imageData.data;
-        var colors = [];
+        var imageData = ctx.getImageData(destX, destY, sourceWidth, sourceHeight);
+        imageObj.colors = [];
+        var pixSize = 5;
+        var colorDiff = 3;
+        if(sourceWidth < 200) {
+            pixSize = 2;
+            colorDiff = 7;
+        }
 
-         getColors(sourceWidth, sourceHeight,pixelation, colors, data );
-       
-  
-         console.log(colors);
-            // overwrite original image
-            ctx.putImageData(imageData, destX, destY);
-            pixelation -= 1;
-        
+        var params = {
+            data: imageData.data,
+            pixelation: pixSize,
+            sourceWidth: sourceWidth,
+            sourceHeight: sourceHeight,
+            colors:  imageObj.colors,
+            colorDiff: colorDiff
+        }
+ 
+         imageObj.colors = getColors(params);
+
+         ctx.putImageData(imageData, destX , destY );
+         params.pixelation -= 1;
     }
+    
     return imageObj;
 }
 
@@ -109,81 +108,257 @@ function saveImage (link, filename) {
     link.download = filename;
 }
 
-function searchForArray(arrayOfArrays, array){
-   
-    var aOA = arrayOfArrays.map(function(arr) {
+
+function getColors(params) {
+
+    var tempV = [];
+    var r,
+        g,
+        b,
+        xyz,
+        lab,
+        rgb,
+        temp;
+    
+       for (var y = 0; y < params.sourceHeight; y += params.pixelation) {
+        for (var x = 0; x < params.sourceWidth; x += params.pixelation) {
+            r = params.data[((params.sourceWidth * y) + x) * 4],
+            g = params.data[((params.sourceWidth * y) + x) * 4 + 1],
+            b = params.data[((params.sourceWidth * y) + x) * 4 + 2];
+
+            for (var n = 0; n < params.pixelation; n++) {
+                    for (var m = 0; m < params.pixelation; m++) {
+                         if (x + m < params.sourceWidth) {
+                             params.data[((params.sourceWidth * (y + n)) + (x + m)) * 4] = r;
+                             params.data[((params.sourceWidth * (y + n)) + (x + m)) * 4 + 1] = g;
+                             params.data[((params.sourceWidth * (y + n)) + (x + m)) * 4 + 2] = b;
+                         }
+                     }
+                 }
+            }
+         }
+    for (var y = 0; y < params.sourceHeight*4; y +=4) {
+        for (var x = 0; x < params.sourceWidth*4; x+=4) {
+
+            r = params.data[((params.sourceWidth * y) + x)];
+            g = params.data[((params.sourceWidth * y) + x + 1)];
+            b = params.data[((params.sourceWidth * y) + x + 2)];
+
+            xyz = rgbToXyz(r, g, b);
+            lab = xyzToLab(xyz[0], xyz[1], xyz[2]);
+
+            if(!(temp = findSimilar(params.colors, lab, params.colorDiff))){
+                tempV.push([r, g, b]);
+                params.colors.push(lab);
+            } else  {
+                if(temp !== true){
+                    lab = temp;
+                    xyz = labtoxyz(lab[0], lab[1], lab[2]);
+                    rgb =  xyztorgb(xyz[0], xyz[1], xyz[2]);
+
+                     params.data[((params.sourceWidth * y) + x)] = rgb[0] ;
+                     params.data[((params.sourceWidth * y) + x + 1)] = rgb[1];
+                     params.data[((params.sourceWidth * y) + x + 2)] = rgb[2];
+
+                 }
+            }
+        }
+   }
+   console.log(tempV.length);
+
+    return tempV;
+}
+
+
+function findSimilar(array, value, size) {
+
+    var a = value.slice();
+    var aOA = array.map(function(arr) {
          return arr.slice();
      });
 
-     var a = array.slice(0);
-
      for(var i=0; i<aOA.length; i++){
-        if(aOA[i].sort().join(',') === a.sort().join(',')){
-         return false;
+        if(aOA[i].sort().join(',') === a.sort().join(',') ){
+            var diff = cie1994(a, aOA[i], false);
+            return true;
+       } else {
+           var diff = cie1994(a, aOA[i], false);
+           if(diff < 6){
+              return value = array[i];
+           }
        }
      }
-     return true;
+    return false;
 }
 
-function find(array, value) {
-    return array.indexOf(value) > -1;
-}
 
-function comparison(val1, array) {
-    for (var i = 0; i <= array.length; i++){
+function rgbToXyz(r, g, b) {
+    var _r = (r / 255);
+    var _g = (g / 255);
+    var _b = (b / 255);
 
+    if (_r > 0.04045) {
+        _r = Math.pow(((_r + 0.055) / 1.055), 2.4);
+    } else {
+        _r = _r / 12.92;
     }
-}
 
-function getColors(sourceWidth, sourceHeight, pixelation, colors, data) {
+    if (_g > 0.04045) {
+        _g = Math.pow(((_g + 0.055) / 1.055), 2.4);
+    } else {
+        _g = _g / 12.92;
+    }
 
-    var red, blue, green;
-        for (var y = 0; y < sourceHeight; y += pixelation) {
+    if (_b > 0.04045) {
+        _b = Math.pow(((_b + 0.055) / 1.055), 2.4);
+    }else {
+        _b = _b / 12.92;
+   }
 
-            for (var x = 0; x < sourceWidth; x += pixelation) {
-                red = data[((sourceWidth * y) + x)];
-                blue = data[((sourceWidth * y) + x + 1)];
-                green = data[((sourceWidth * y) + x + 2)];
+   _r = _r * 100;
+   _g = _g * 100;
+   _b = _b * 100;
 
-                var pix = rgbToHex(red, blue, green);
+   var X = _r * 0.4124 + _g * 0.3576 + _b * 0.1805;
+   var Y = _r * 0.2126 + _g * 0.7152 + _b * 0.0722;
+   var Z = _r * 0.0193 + _g * 0.1192 + _b * 0.9505;
 
-                if(!find(colors, pix)){
-                    colors.push(pix);
-                }
-//
-//                red = data[((sourceWidth * y) + x) * 4],
-//                    green = data[((sourceWidth * y) + x) * 4 + 1],
-//                    blue = data[((sourceWidth * y) + x) * 4 + 2];
-//
-//                    var temp_v =[];
-//                    temp_v.push(red,green,blue);
-//
-//                    if(searchForArray(colors,temp_v)){
-//                         colors.push(temp_v);
-//                    }
-//                   var b = data[(( sourceWidth * (y + n)) + (x + m)) * 4 + 2] - blue;
-//                   var r = data[(( sourceWidth * (y + n)) + (x + m)) * 4 ] - red;
-//                   var g = data[(( sourceWidth * (y + n)) + (x + m)) * 4 + 1] - green;
-//                for (var n = 0; n < pixelation; n++) {
-//                    for (var m = 0; m < pixelation; m++) {
-//
-//
-//
-//                        if( !(-10 < b && b < 10) && !(-10 < r && r < 10) && !(-10 < g && g < 10) ){
-//
-//
-//                        if (x + m < sourceWidth) {
-//
-//                            data[((sourceWidth * (y + n)) + (x + m)) * 4] = red;
-//                            data[((sourceWidth * (y + n)) + (x + m)) * 4 + 1] = green;
-//                            data[((sourceWidth * (y + n)) + (x + m)) * 4 + 2] = blue;
-//                        }
-//                    }
-//                }
-//
-//                }
-            }
-        }
-        }
+    return [X, Y, Z];
+};
+function xyztorgb(x, y, z) {
 
+   var _r = x * 3.2404 + y * (-1.5371) + z * (-0.4985);
+   var _g = x * (-0.9692) + y * 1.8760 + z * 0.04155;
+   var _b = x * 0.0556 + y * (-0.2040) + z * (1.0572);
 
+   _r = _r / 100;
+   _g = _g / 100;
+   _b = _b / 100;
+
+    if (_r > 0.0031308) {
+        _r = Math.pow(_r , 0.416666665) * 1.055 - 0.055;
+    } else {
+        _r = _r / 12.92;
+    }
+
+    if (_g > 0.0031308) {
+        _g = Math.pow(_g , 0.416666665) * 1.055 - 0.055;
+    } else {
+        _g = _g / 12.92;
+    }
+
+    if (_b > 0.0031308) {
+        _b = Math.pow(_b , 0.416666665) * 1.055 - 0.055;
+    }else {
+        _b = _b / 12.92;
+   }
+
+    var r = parseFloat((_r * 255).toFixed(0));
+    var g = parseFloat((_g * 255).toFixed(0));
+    var b = parseFloat((_b * 255).toFixed(0));
+
+    return [r, g, b];
+};
+
+function xyzToLab(x, y, z) {
+    var ref_X =  95.047;
+    var ref_Y = 100.000;
+    var ref_Z = 108.883;
+    var _X = x / ref_X;
+    var _Y = y / ref_Y;
+    var _Z = z / ref_Z;
+
+    if (_X > 0.008856) {
+         _X = Math.pow(_X, (1/3));
+    } else {
+        _X = (7.787 * _X) + (16 / 116);
+    }
+
+    if (_Y > 0.008856) {
+        _Y = Math.pow(_Y, (1/3));
+    } else {
+      _Y = (7.787 * _Y) + (16 / 116);
+    }
+
+    if (_Z > 0.008856) {
+        _Z = Math.pow(_Z, (1/3));
+    } else {
+        _Z = (7.787 * _Z) + (16 / 116);
+    }
+
+    var CIE_L = (116 * _Y) - 16;
+    var CIE_a = 500 * (_X - _Y);
+    var CIE_b = 200 * (_Y - _Z);
+
+    return [CIE_L, CIE_a, CIE_b];
+};
+
+function labtoxyz(CIE_L, CIE_a, CIE_b) {
+    var ref_X =  95.047;
+    var ref_Y = 100.000;
+    var ref_Z = 108.883;
+
+    var _Y = (CIE_L + 16)/116;
+    var _X = CIE_a/500 + _Y;
+    var _Z = _Y - CIE_b/200;
+
+    if (_X > 0.20689303442296383) {
+         _X = Math.pow(_X, 3);
+    } else {
+       _X = ( _X - (16 / 116) )/7.787 ;
+    }
+
+    if (_Y > 0.20689303442296383) {
+         _Y = Math.pow(_Y, 3);
+    } else {
+        _Y = ( _Y - (16 / 116) )/7.787 ;
+    }
+
+    if (_Z > 0.20689303442296383) {
+         _Z = Math.pow(_Z, 3);
+    } else {
+         _Z = ( _Z - (16 / 116) )/7.787 ;
+    }
+
+    var   x = ref_X *_X;
+    var   y = ref_Y * _Y;
+    var   z = ref_Z * _Z;
+
+    return [x, y, z];
+};
+
+function cie1994(x, y, isTextiles) {
+
+    var x = {l: x[0], a: x[1], b: x[2]};
+    var y = {l: y[0], a: y[1], b: y[2]};
+    var labx = x;
+    var laby = y;
+    var k2;
+    var k1;
+    var kl;
+    var kh = 1;
+    var kc = 1;
+
+    if (isTextiles) {
+        k2 = 0.014;
+        k1 = 0.048;
+        kl = 2;
+    } else {
+        k2 = 0.015;
+        k1 = 0.045;
+        kl = 1;
+    }
+
+    var c1 = Math.sqrt(x.a * x.a + x.b * x.b);
+    var c2 = Math.sqrt(y.a * y.a + y.b * y.b);
+    var sh = 1 + k2 * c1;
+    var sc = 1 + k1 * c1;
+    var sl = 1;
+    var da = x.a - y.a;
+    var db = x.b - y.b;
+    var dc = c1 - c2;
+    var dl = x.l - y.l;
+    var dh = Math.sqrt(da * da + db * db - dc * dc);
+
+    return Math.sqrt(Math.pow((dl/(kl * sl)),2) + Math.pow((dc/(kc * sc)),2) + Math.pow((dh/(kh * sh)),2));
+};

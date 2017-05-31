@@ -2,10 +2,12 @@
 
 $(document).ready(function() {
     var image;
+    
     imageObj.init('myCanvas');
 
     $('#makePixel').on('click', function () {
-      image = imageObj.makePixelezation(4);
+      image = imageObj.makePixelezation();
+    
     });
 
     $('#downloadLnk').on('click', function() {
@@ -14,15 +16,15 @@ $(document).ready(function() {
     });
 
     $('.getPallete').on('click', function(){
-       createPallete(image);
+        
+       createPallete(image.colors);
     });
 });
 
 function createPallete(image) {
     $("#pallete").empty();
-    var colorThief = new ColorThief();
 
-   var items = colorThief.getPalette(image);
+   var items = image;
 
     items.map(function(item) {
         var liText = rgbToHex(item[0], item[1], item[2]);

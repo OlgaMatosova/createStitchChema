@@ -2,12 +2,11 @@
 
 $(document).ready(function() {
     var image;
-    
+
     imageObj.init('myCanvas');
 
     $('#makePixel').on('click', function () {
       image = imageObj.makePixelezation();
-    
     });
 
     $('#downloadLnk').on('click', function() {
@@ -16,7 +15,6 @@ $(document).ready(function() {
     });
 
     $('.getPallete').on('click', function(){
-        
        createPallete(image.colors);
     });
 });
